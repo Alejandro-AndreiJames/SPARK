@@ -1,0 +1,246 @@
+<div class="min-h-screen bg-gradient-to-br from-purple-900 to-blue-900 p-6">
+  <div class="max-w-4xl mx-auto space-y-8">
+    <!-- SPARK Title -->
+    <div class="text-center space-y-2">
+      <h1 class="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 tracking-wider">
+        SPARK
+      </h1>
+      <div class="h-1 w-24 mx-auto bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"></div>
+      <h2 class="text-4xl font-bold text-white mb-2">Secure Text Encryption</h2>
+      <p class="text-blue-200">Protect your messages with our unique encryption algorithm</p>
+    </div>
+
+    <!-- Toggle Switch -->
+    <div class="flex justify-center">
+      <div class="bg-white/10 backdrop-blur-lg rounded-lg p-1 inline-flex">
+        <button 
+          (click)="isEncryption = true" 
+          [class]="isEncryption ? 'bg-blue-500 text-white' : 'text-blue-200 hover:text-white'"
+          class="px-6 py-2 rounded-lg transition-all duration-200 font-semibold">
+          Encryption
+        </button>
+        <button 
+          (click)="isEncryption = false"
+          [class]="!isEncryption ? 'bg-blue-500 text-white' : 'text-blue-200 hover:text-white'"
+          class="px-6 py-2 rounded-lg transition-all duration-200 font-semibold">
+          Decryption
+        </button>
+      </div>
+    </div>
+
+    <!-- Encryption Section -->
+    <div *ngIf="isEncryption" class="bg-white/10 backdrop-blur-lg rounded-xl p-6 space-y-4">
+      <div class="mb-4">
+        <h2 class="text-2xl font-semibold text-white mb-1">Text Encryption</h2>
+        <p class="text-sm text-blue-200">
+          <i class="fas fa-info-circle mr-1"></i>
+          Fields marked with an asterisk (<span class="text-blue-400">*</span>) are required
+        </p>
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-blue-200 mb-2">
+            Enter Text to Encrypt <span class="text-blue-400">*</span>
+          </label>
+          <textarea 
+            [(ngModel)]="plainText"
+            class="w-full h-32 bg-white/5 border border-blue-300/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Type your message here..."></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-blue-200 mb-2">
+            Secret Key <span class="text-blue-400">*</span>
+          </label>
+          <div class="relative">
+            <input 
+              [(ngModel)]="encryptKey"
+              [type]="showEncryptKey ? 'text' : 'password'"
+              class="w-full bg-white/5 border border-blue-300/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="Enter your secret key">
+            <button 
+              (click)="showEncryptKey = !showEncryptKey"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-200 hover:text-white transition-colors">
+              <i class="fas" [class.fa-eye]="!showEncryptKey" [class.fa-eye-slash]="showEncryptKey"></i>
+            </button>
+          </div>
+        </div>
+
+        <button 
+          (click)="encrypt()"
+          [disabled]="isEncrypting || !plainText || !encryptKey"
+          [class]="(!plainText || !encryptKey) ? 'opacity-50 cursor-not-allowed' : ''"
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-lg transition duration-200">
+          Encrypt
+        </button>
+
+        <div *ngIf="encryptionResult">
+          <label class="block text-blue-200 mb-2">
+            Encrypted Result
+            <!-- Success Animation -->
+            <span *ngIf="encryptionSuccess" 
+                  class="ml-2 inline-flex items-center text-green-400 animate-fade-in">
+              <i class="fas fa-check-circle"></i>
+              <span class="ml-1 text-sm">Encryption successful!</span>
+            </span>
+          </label>
+          <div class="relative">
+            <textarea 
+              [value]="encryptionResult"
+              readonly
+              class="w-full h-32 bg-white/5 border border-blue-300/30 rounded-lg p-3 text-white focus:outline-none"
+              placeholder="Encrypted text will appear here..."></textarea>
+            <button 
+              (click)="copyToClipboard(encryptionResult)"
+              class="absolute right-3 top-3 text-blue-200 hover:text-white transition-colors"
+              title="Copy to clipboard">
+              <i class="fas fa-copy"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decryption Section -->
+    <div *ngIf="!isEncryption" class="bg-white/10 backdrop-blur-lg rounded-xl p-6 space-y-4">
+      <div class="mb-4">
+        <h2 class="text-2xl font-semibold text-white mb-1">Text Decryption</h2>
+        <p class="text-sm text-blue-200">
+          <i class="fas fa-info-circle mr-1"></i>
+          Fields marked with an asterisk (<span class="text-blue-400">*</span>) are required
+        </p>
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-blue-200 mb-2">
+            Enter Encrypted Text <span class="text-blue-400">*</span>
+          </label>
+          <textarea 
+            [(ngModel)]="textToDecrypt"
+            class="w-full h-32 bg-white/5 border border-blue-300/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Paste encrypted text here..."></textarea>
+        </div>
+        
+        <div>
+          <label class="block text-blue-200 mb-2">
+            Secret Key <span class="text-blue-400">*</span>
+          </label>
+          <div class="relative">
+            <input 
+              [(ngModel)]="decryptKey"
+              [type]="showDecryptKey ? 'text' : 'password'"
+              class="w-full bg-white/5 border border-blue-300/30 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="Enter your secret key">
+            <button 
+              (click)="showDecryptKey = !showDecryptKey"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-blue-200 hover:text-white transition-colors">
+              <i class="fas" [class.fa-eye]="!showDecryptKey" [class.fa-eye-slash]="showDecryptKey"></i>
+            </button>
+          </div>
+        </div>
+
+        <button 
+          (click)="decrypt()"
+          [disabled]="isDecrypting || !textToDecrypt || !decryptKey"
+          [class]="(!textToDecrypt || !decryptKey) ? 'opacity-50 cursor-not-allowed' : ''"
+          class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition duration-200">
+          Decrypt
+        </button>
+
+        <div *ngIf="decryptedText">
+          <label class="block text-blue-200 mb-2">Decrypted Result</label>
+          <textarea 
+            [value]="decryptedText"
+            readonly
+            class="w-full h-32 bg-white/5 border border-blue-300/30 rounded-lg p-3 text-white focus:outline-none"
+            placeholder="Decrypted text will appear here..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Note -->
+    <div class="text-center text-blue-200 text-sm">
+      <p>⚠️ Never share your secret key with anyone. Keys are not stored on our servers.</p>
+    </div>
+
+    <!-- Loading Modal -->
+    <div *ngIf="isEncrypting" 
+         class="fixed inset-0 flex items-center justify-center z-50 animate-fade-in">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      
+      <!-- Modal Content -->
+      <div class="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl relative z-10 transform animate-scale-in">
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-16 w-16 mb-4">
+            <svg class="animate-spin h-12 w-12 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-white mb-2">Encrypting...</h3>
+          <p class="text-blue-200">Please wait while we secure your message.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div *ngIf="showSuccessModal" 
+         class="fixed inset-0 flex items-center justify-center z-50 animate-fade-in">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      
+      <!-- Modal Content -->
+      <div class="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl relative z-10 transform animate-scale-in">
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-500/20 mb-4">
+            <i class="fas fa-check text-3xl text-green-400"></i>
+          </div>
+          <h3 class="text-lg font-medium text-white mb-2">Success!</h3>
+          <p class="text-blue-200">Your text has been encrypted successfully.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decryption Loading Modal -->
+    <div *ngIf="isDecrypting" 
+         class="fixed inset-0 flex items-center justify-center z-50 animate-fade-in">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      
+      <!-- Modal Content -->
+      <div class="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl relative z-10 transform animate-scale-in">
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-16 w-16 mb-4">
+            <svg class="animate-spin h-12 w-12 text-green-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg font-medium text-white mb-2">Decrypting...</h3>
+          <p class="text-blue-200">Please wait while we decode your message.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decryption Success Modal -->
+    <div *ngIf="showDecryptSuccessModal" 
+         class="fixed inset-0 flex items-center justify-center z-50 animate-fade-in">
+      <!-- Backdrop -->
+      <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+      
+      <!-- Modal Content -->
+      <div class="bg-white/10 backdrop-blur-lg rounded-xl p-8 shadow-xl relative z-10 transform animate-scale-in">
+        <div class="text-center">
+          <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-500/20 mb-4">
+            <i class="fas fa-unlock text-3xl text-green-400"></i>
+          </div>
+          <h3 class="text-lg font-medium text-white mb-2">Success!</h3>
+          <p class="text-blue-200">Your message has been decrypted successfully.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
